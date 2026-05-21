@@ -1,9 +1,3 @@
-"""
-Golden Master Tests — Testes de caracterização do sistema legado.
-
-Capturam o comportamento exato das classes Sis e PedEspecial para garantir
-que a refatoração não introduza regressões.
-"""
 import os
 import sys
 
@@ -13,10 +7,6 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
 
 from legacy import Sis, PedEspecial
 
-
-# ============================================================
-# Fixtures
-# ============================================================
 
 @pytest.fixture
 def sis(tmp_path, monkeypatch):
@@ -36,13 +26,7 @@ def ped_especial(tmp_path, monkeypatch):
     s.close()
 
 
-# ============================================================
-# Task 2.1 — Criação de pedidos e cálculo de total
-# Requirements: 1.2, 1.3, 1.4, 1.11, 14.2, 14.3
-# ============================================================
-
 class TestOrderCreationAndTotal:
-    """Golden Master: criação de pedidos e cálculo de totais."""
 
     def test_pedido_normal_calcula_total_corretamente(self, sis):
         """Itens normal + desc10: 100*2 + 50*1*0.9 = 245.0"""
@@ -132,13 +116,7 @@ class TestOrderCreationAndTotal:
         assert pedido['tp'] == 'vip'
 
 
-# ============================================================
-# Task 2.2 — Processamento de pagamento
-# Requirements: 1.5, 1.6, 1.12, 14.7
-# ============================================================
-
 class TestPaymentProcessing:
-    """Golden Master: processamento de pagamentos."""
 
     def test_cartao_aprova_pedido(self, sis):
         """Cartão com valor suficiente → True, status 'aprovado'."""
@@ -194,13 +172,7 @@ class TestPaymentProcessing:
         assert result is False
 
 
-# ============================================================
-# Task 2.3 — Status, fidelidade, cancelamento, estoque
-# Requirements: 1.7, 1.8, 1.9, 14.4, 14.6
-# ============================================================
-
 class TestStatusLoyaltyCancellationStock:
-    """Golden Master: atualização de status, pontos, cancelamento, estoque."""
 
     def test_entrega_pontos_cliente_normal(self, sis, capsys):
         """Entrega normal: pontos = int(total * 1)."""
@@ -315,13 +287,7 @@ class TestStatusLoyaltyCancellationStock:
         assert ped_especial.get_ped(id_ped)['st'] == 'entregue'
 
 
-# ============================================================
-# Task 2.4 — Geração de relatórios
-# Requirements: 1.10, 14.5
-# ============================================================
-
 class TestReportGeneration:
-    """Golden Master: geração de relatórios."""
 
     def test_relatorio_vendas_cria_arquivo(self, sis):
         """Relatório de vendas cria rel_vendas.txt com conteúdo."""
