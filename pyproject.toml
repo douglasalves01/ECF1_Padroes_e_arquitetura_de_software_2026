@@ -1,7 +1,7 @@
 [project]
 name = "loja-verde"
 version = "1.0.0"
-description = "Refatoração do sistema legado Loja Verde"
+description = "Sistema de pedidos Loja Verde"
 requires-python = ">=3.10"
 dependencies = []
 
