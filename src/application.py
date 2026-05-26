@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+from src.observers.whatsapp_observer import WhatsAppObserver
 from src.repositories.interfaces import OrderRepositoryInterface
 from src.repositories.sqlite_repository import SqliteOrderRepository
 from src.services.concrete_order_factory import ConcreteOrderFactory
@@ -8,6 +9,7 @@ from src.services.inventory_service import InMemoryInventoryService
 from src.services.notification_service import NotificationService
 from src.services.order_service import OrderService
 from src.services.payment_service import PaymentService
+from src.strategies.crypto_payment_strategy import CryptoPaymentStrategy
 from src.strategies.payment_implementations import (
     BoletoPaymentStrategy,
     CardPaymentStrategy,
@@ -39,9 +41,11 @@ def create_application(*, special: bool = False) -> ApplicationContext:
         "cartao": CardPaymentStrategy(),
         "pix": PixPaymentStrategy(),
         "boleto": BoletoPaymentStrategy(),
+        "cripto": CryptoPaymentStrategy(),
     }
     payment_service = PaymentService(repository, strategies, order_service)
     inventory: InventoryServiceInterface = InMemoryInventoryService()
+    notifications.add_observer(WhatsAppObserver())
     return ApplicationContext(
         repository=repository,
         order_service=order_service,

@@ -1,0 +1,305 @@
+@startuml Loja_Verde_Sprint2
+
+skinparam classAttributeIconSize 0
+skinparam classFontSize 12
+skinparam packageFontSize 13
+skinparam linetype ortho
+hide empty members
+
+' ─────────────────────────────────────────────────────────────
+' MODELOS
+' ─────────────────────────────────────────────────────────────
+
+package "models" #E1F5EE {
+
+    class Order {
+        +id: int
+        +customer_name: str
+        +items: list[OrderItem]
+        +total: float
+        +status: str
+        +created_at: str
+        +customer_type: str
+        +loyalty_multiplier: float
+        +to_legacy_dict(): dict
+    }
+
+    class OrderItem {
+        +name: str
+        +price: float
+        +quantity: int
+        +discount_type: str
+        +from_legacy_dict(data): OrderItem
+        +to_legacy_dict(): dict
+    }
+
+    class Customer {
+        +name: str
+        +customer_type: str
+    }
+
+    Order "1" *-- "n" OrderItem
+}
+
+' ─────────────────────────────────────────────────────────────
+' REPOSITÓRIO
+' ─────────────────────────────────────────────────────────────
+
+package "repositories" #E6F1FB {
+
+    abstract class OrderRepositoryInterface {
+        {abstract} +save(order: Order): int
+        {abstract} +find_by_id(id: int): Order
+        {abstract} +find_by_customer(name: str): list[Order]
+        {abstract} +update_status(id: int, status: str): bool
+        {abstract} +find_all(): list[Order]
+        {abstract} +find_distinct_customers(): list
+        {abstract} +close(): None
+    }
+
+    class SqliteOrderRepository {
+        -_db: Connection
+        -_cursor: Cursor
+        +save(order: Order): int
+        +find_by_id(id: int): Order
+        +find_by_customer(name: str): list[Order]
+        +update_status(id: int, status: str): bool
+        +find_all(): list[Order]
+        +find_distinct_customers(): list
+        +close(): None
+    }
+
+    OrderRepositoryInterface <|-- SqliteOrderRepository
+}
+
+' ─────────────────────────────────────────────────────────────
+' ESTRATÉGIAS DE DESCONTO
+' ─────────────────────────────────────────────────────────────
+
+package "strategies.discount" #FAEEDA {
+
+    abstract class ItemDiscountStrategy {
+        {abstract} +calculate(price: float, quantity: int): float
+    }
+
+    class NoDiscountStrategy {
+        +calculate(price: float, quantity: int): float
+    }
+
+    class Discount10Strategy {
+        +calculate(price: float, quantity: int): float
+    }
+
+    class Discount20Strategy {
+        +calculate(price: float, quantity: int): float
+    }
+
+    class VolumeDiscountStrategy {
+        -_base_strategy: ItemDiscountStrategy
+        +calculate(price: float, quantity: int): float
+    }
+
+    ItemDiscountStrategy <|-- NoDiscountStrategy
+    ItemDiscountStrategy <|-- Discount10Strategy
+    ItemDiscountStrategy <|-- Discount20Strategy
+    ItemDiscountStrategy <|-- VolumeDiscountStrategy
+    VolumeDiscountStrategy o-- ItemDiscountStrategy : compõe
+
+    abstract class ClientDiscountStrategy {
+        {abstract} +apply(subtotal: float): float
+    }
+
+    class NoClientDiscount {
+        +apply(subtotal: float): float
+    }
+
+    class VipClientDiscount {
+        +apply(subtotal: float): float
+    }
+
+    class CorporateClientDiscount {
+        +apply(subtotal: float): float
+    }
+
+    ClientDiscountStrategy <|-- NoClientDiscount
+    ClientDiscountStrategy <|-- VipClientDiscount
+    ClientDiscountStrategy <|-- CorporateClientDiscount
+}
+
+' ─────────────────────────────────────────────────────────────
+' ESTRATÉGIAS DE PAGAMENTO
+' ─────────────────────────────────────────────────────────────
+
+package "strategies.payment" #FAECE7 {
+
+    class PaymentResult {
+        +success: bool
+        +approves_order: bool
+        +message: str
+    }
+
+    abstract class PaymentStrategy {
+        {abstract} +process(order_total: float, amount_paid: float): PaymentResult
+    }
+
+    class CardPaymentStrategy {
+        +process(order_total: float, amount_paid: float): PaymentResult
+    }
+
+    class PixPaymentStrategy {
+        +process(order_total: float, amount_paid: float): PaymentResult
+    }
+
+    class BoletoPaymentStrategy {
+        +process(order_total: float, amount_paid: float): PaymentResult
+    }
+
+    class CryptoPaymentStrategy {
+        +process(order_total: float, amount_paid: float): PaymentResult
+    }
+
+    PaymentStrategy <|-- CardPaymentStrategy
+    PaymentStrategy <|-- PixPaymentStrategy
+    PaymentStrategy <|-- BoletoPaymentStrategy
+    PaymentStrategy <|-- CryptoPaymentStrategy
+    PaymentStrategy ..> PaymentResult
+}
+
+' ─────────────────────────────────────────────────────────────
+' OBSERVERS DE NOTIFICAÇÃO
+' ─────────────────────────────────────────────────────────────
+
+package "observers" #EEEDFE {
+
+    abstract class NotificationObserver {
+        {abstract} +notify(event: str, order_data: dict): None
+    }
+
+    class EmailObserver {
+        +notify(event: str, order_data: dict): None
+    }
+
+    class SmsObserver {
+        +notify(event: str, order_data: dict): None
+    }
+
+    class AccountManagerObserver {
+        +notify(event: str, order_data: dict): None
+    }
+
+    class SpecialOrderObserver {
+        +notify(event: str, order_data: dict): None
+    }
+
+    class WhatsAppObserver {
+        +notify(event: str, order_data: dict): None
+    }
+
+    NotificationObserver <|-- EmailObserver
+    NotificationObserver <|-- SmsObserver
+    NotificationObserver <|-- AccountManagerObserver
+    NotificationObserver <|-- SpecialOrderObserver
+    NotificationObserver <|-- WhatsAppObserver
+}
+
+' ─────────────────────────────────────────────────────────────
+' SERVIÇOS
+' ─────────────────────────────────────────────────────────────
+
+package "services" #EAF3DE {
+
+    class NotificationService {
+        -_observers: list[NotificationObserver]
+        +add_observer(obs: NotificationObserver): None
+        +remove_observer(obs: NotificationObserver): None
+        +notify_all(event: str, data: dict): None
+        +clear_observers(): None
+    }
+
+    NotificationService o-- NotificationObserver : agrega
+
+    class OrderConfiguration {
+        +client_discount: ClientDiscountStrategy
+        +observers: list[NotificationObserver]
+        +loyalty_multiplier: float
+    }
+
+    abstract class OrderFactory {
+        {abstract} +create_order(name: str, items: list, type: str): Order
+        {abstract} +get_configuration(type: str): OrderConfiguration
+        {abstract} +get_observers(type: str): list[NotificationObserver]
+    }
+
+    class ConcreteOrderFactory {
+        +create_order(name: str, items: list, type: str): Order
+        +get_configuration(type: str): OrderConfiguration
+        +get_observers(type: str): list[NotificationObserver]
+    }
+
+    OrderFactory <|-- ConcreteOrderFactory
+    OrderFactory ..> OrderConfiguration
+    OrderConfiguration o-- ClientDiscountStrategy
+    OrderConfiguration o-- NotificationObserver
+
+    class OrderService {
+        -_repository: OrderRepositoryInterface
+        -_factory: OrderFactory
+        -_notifications: NotificationService
+        -_special: bool
+        +create_order(name: str, items: list, type: str): int
+        +get_order(id: int): Order
+        +update_status(id: int, status: str): bool
+        +cancel_order(id: int): bool
+        +get_customer_total(name: str): float
+        +generate_report(type: str): None
+    }
+
+    class PaymentService {
+        -_repository: OrderRepositoryInterface
+        -_strategies: dict[str, PaymentStrategy]
+        -_order_service: OrderService
+        +process_payment(id: int, method: str, amount: float): bool
+    }
+
+    abstract class InventoryServiceInterface {
+        {abstract} +validate(items: list): bool
+    }
+
+    class InMemoryInventoryService {
+        -_stock: dict
+        +validate(items: list): bool
+    }
+
+    InventoryServiceInterface <|-- InMemoryInventoryService
+
+    OrderService --> OrderRepositoryInterface : usa
+    OrderService --> OrderFactory : usa
+    OrderService --> NotificationService : usa
+
+    PaymentService --> OrderRepositoryInterface : usa
+    PaymentService --> PaymentStrategy : usa
+    PaymentService --> OrderService : usa
+}
+
+' ─────────────────────────────────────────────────────────────
+' CONTEXTO DA APLICAÇÃO
+' ─────────────────────────────────────────────────────────────
+
+package "application" #F1EFE8 {
+
+    class ApplicationContext {
+        +repository: OrderRepositoryInterface
+        +order_service: OrderService
+        +payment_service: PaymentService
+        +inventory: InventoryServiceInterface
+        +notification_service: NotificationService
+    }
+
+    ApplicationContext --> OrderService
+    ApplicationContext --> PaymentService
+    ApplicationContext --> InventoryServiceInterface
+    ApplicationContext --> NotificationService
+    ApplicationContext --> OrderRepositoryInterface
+}
+
+@enduml
