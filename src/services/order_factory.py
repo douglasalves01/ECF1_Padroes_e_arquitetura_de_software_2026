@@ -27,3 +27,7 @@ class OrderFactory(ABC):
     @abstractmethod
     def get_configuration(self, customer_type: str) -> OrderConfiguration:
         ...
+
+    @abstractmethod
+    def get_observers(self, customer_type: str) -> list[NotificationObserver]:
+        ...
