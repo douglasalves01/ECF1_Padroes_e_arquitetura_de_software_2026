@@ -1,4 +1,3 @@
-import pytest
 
 from src.strategies.payment_implementations import (
     BoletoPaymentStrategy,

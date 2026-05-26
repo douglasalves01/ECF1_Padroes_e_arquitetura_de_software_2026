@@ -1,4 +1,5 @@
 from typing import Any
+
 from src.observers.notification_observer import NotificationObserver
 
 _WHATSAPP_EVENTS: frozenset[str] = frozenset(

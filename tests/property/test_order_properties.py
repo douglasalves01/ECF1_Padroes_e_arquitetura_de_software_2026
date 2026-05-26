@@ -1,4 +1,3 @@
-import pytest
 
 from src.application import create_application
 from src.models.order_item import OrderItem
@@ -25,7 +24,11 @@ def test_state_transition_validation(tmp_path, monkeypatch):
     ctx = create_application()
     items = [OrderItem("p1", 100, 1, "normal")]
     order_id = ctx.order_service.create_order("Joao", items, "normal")
-    assert ctx.order_service.update_status(order_id, "entregue", enforce_transitions=True) is False
+    assert ctx.order_service.update_status(
+        order_id,
+        "entregue",
+        enforce_transitions=True
+    ) is False
     assert ctx.order_service.get_order(order_id).status == "pendente"
     ctx.repository.close()
 

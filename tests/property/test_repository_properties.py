@@ -5,7 +5,6 @@ from pathlib import Path
 import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
-
 from src.models.order import Order
 from src.models.order_item import OrderItem
 from src.repositories.sqlite_repository import SqliteOrderRepository
@@ -14,19 +13,48 @@ from src.repositories.sqlite_repository import SqliteOrderRepository
 def _order_strategy():
     return st.builds(
         Order,
-        customer_name=st.text(min_size=1, max_size=30, alphabet=st.characters(blacklist_categories=["Cs"])),
+        customer_name=st.text(
+            min_size=1,
+            max_size=30,
+            alphabet=st.characters(
+                blacklist_categories=["Cs"],
+            ),
+        ),
         items=st.lists(
             st.builds(
                 OrderItem,
-                name=st.text(min_size=1, max_size=20, alphabet=st.characters(blacklist_categories=["Cs"])),
-                price=st.floats(min_value=0.01, max_value=1000, allow_nan=False, allow_infinity=False),
+                name=st.text(
+                    min_size=1,
+                    max_size=20,
+                    alphabet=st.characters(
+                        blacklist_categories=["Cs"],
+                    ),
+                ),
+                price=st.floats(
+                    min_value=0.01,
+                    max_value=1000,
+                    allow_nan=False,
+                    allow_infinity=False
+                ),
                 quantity=st.integers(min_value=1, max_value=10),
-                discount_type=st.sampled_from(["normal", "desc10", "desc20", "frete_gratis"]),
+                discount_type=st.sampled_from(
+                    [
+                        "normal",
+                        "desc10",
+                        "desc20",
+                        "frete_gratis"
+                    ]
+                ),
             ),
             min_size=1,
             max_size=5,
         ),
-        total=st.floats(min_value=0.01, max_value=10000, allow_nan=False, allow_infinity=False),
+        total=st.floats(
+            min_value=0.01,
+            max_value=10000,
+            allow_nan=False,
+            allow_infinity=False
+        ),
         status=st.just("pendente"),
         created_at=st.just(datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
         customer_type=st.sampled_from(["normal", "vip", "corporativo"]),

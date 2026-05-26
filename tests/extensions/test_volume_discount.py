@@ -1,11 +1,11 @@
 import pytest
-
 from src.strategies.volume_discount_strategy import (
     VOLUME_DISCOUNT_RATE,
     VOLUME_THRESHOLD,
     VolumeDiscountStrategy,
     calculate_subtotal_with_volume_discount,
 )
+
 
 class TestVolumeDiscountStrategy:
 
@@ -61,8 +61,8 @@ class TestVolumeDiscountStrategy:
         """Subtotal correto com vários itens e descontos mistos."""
         items = [
             {"p": 50,  "q": 3, "tipo": "desc10"},
-            {"p": 200, "q": 1, "tipo": "desc20"},   
-            {"p": 100, "q": 5, "tipo": "normal"},   
+            {"p": 200, "q": 1, "tipo": "desc20"},
+            {"p": 100, "q": 5, "tipo": "normal"},
         ]
         result = calculate_subtotal_with_volume_discount(items)
         assert result == pytest.approx(114.75 + 160.0 + 425.0)
@@ -82,9 +82,9 @@ class TestVolumeDiscountStrategy:
     def test_nao_modifica_classes_existentes(self) -> None:
         """Garante que classes existentes de desconto não foram alteradas."""
         from src.strategies.discount_implementations import (
-            NoDiscountStrategy,
             Discount10Strategy,
             Discount20Strategy,
+            NoDiscountStrategy,
         )
 
         assert NoDiscountStrategy().calculate(100.0, 3) == pytest.approx(300.0)

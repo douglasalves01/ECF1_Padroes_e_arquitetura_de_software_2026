@@ -2,7 +2,6 @@ from typing import Any
 
 from hypothesis import given, settings
 from hypothesis import strategies as st
-
 from src.observers.notification_observer import NotificationObserver
 from src.services.notification_service import NotificationService
 
@@ -28,7 +27,16 @@ def test_observer_fault_tolerance(n):
     for _ in range(n):
         service.add_observer(_FailObserver())
     service.add_observer(_CountObserver())
-    service.notify_all("evt", {"cli": "A", "tp": "normal", "tot": 1, "id": 1, "st": "x"})
+    service.notify_all(
+        "evt",
+        {
+            "cli": "A",
+            "tp": "normal",
+            "tot": 1,
+            "id": 1,
+            "st": "x"
+        }
+    )
     assert _CountObserver.count == 1
 
 
@@ -38,8 +46,26 @@ def test_observer_add_remove():
     observer = _CountObserver()
     _CountObserver.count = 0
     service.add_observer(observer)
-    service.notify_all("evt", {"cli": "A", "tp": "normal", "tot": 1, "id": 1, "st": "x"})
+    service.notify_all(
+        "evt",
+        {
+            "cli": "A",
+            "tp": "normal",
+            "tot": 1,
+            "id": 1,
+            "st": "x"
+        }
+    )
     assert _CountObserver.count == 1
     service.remove_observer(observer)
-    service.notify_all("evt", {"cli": "A", "tp": "normal", "tot": 1, "id": 1, "st": "x"})
+    service.notify_all(
+        "evt",
+        {
+            "cli": "A",
+            "tp": "normal",
+            "tot": 1,
+            "id": 1,
+            "st": "x"
+        }
+    )
     assert _CountObserver.count == 1

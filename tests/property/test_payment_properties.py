@@ -1,7 +1,5 @@
-import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
-
 from src.strategies.payment_implementations import (
     BoletoPaymentStrategy,
     CardPaymentStrategy,
@@ -10,8 +8,18 @@ from src.strategies.payment_implementations import (
 
 
 @given(
-    total=st.floats(min_value=0.01, max_value=5000, allow_nan=False, allow_infinity=False),
-    paid=st.floats(min_value=0.01, max_value=5000, allow_nan=False, allow_infinity=False),
+    total=st.floats(
+        min_value=0.01,
+        max_value=5000,
+        allow_nan=False,
+        allow_infinity=False
+    ),
+    paid=st.floats(
+        min_value=0.01,
+        max_value=5000,
+        allow_nan=False,
+        allow_infinity=False
+    ),
 )
 @settings(max_examples=100)
 def test_approving_payment_methods(total, paid):
@@ -25,14 +33,28 @@ def test_approving_payment_methods(total, paid):
 
 
 @given(
-    total=st.floats(min_value=0.01, max_value=5000, allow_nan=False, allow_infinity=False),
-    paid=st.floats(min_value=0.0, max_value=5000, allow_nan=False, allow_infinity=False),
+    total=st.floats(
+        min_value=0.01,
+        max_value=5000,
+        allow_nan=False,
+        allow_infinity=False
+    ),
+    paid=st.floats(
+        min_value=0.0,
+        max_value=5000,
+        allow_nan=False,
+        allow_infinity=False
+    ),
 )
 @settings(max_examples=100)
 def test_insufficient_payment_rejected(total, paid):
     """Pagamento insuficiente sempre e rejeitado."""
     if paid >= total:
         return
-    for strategy in (CardPaymentStrategy(), PixPaymentStrategy(), BoletoPaymentStrategy()):
+    for strategy in (
+        CardPaymentStrategy(),
+        PixPaymentStrategy(),
+        BoletoPaymentStrategy(),
+    ):
         result = strategy.process(total, paid)
         assert result.success is False

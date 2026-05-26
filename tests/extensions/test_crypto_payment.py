@@ -4,6 +4,7 @@ from src.strategies.crypto_payment_strategy import (
     CryptoPaymentStrategy,
 )
 
+
 @pytest.fixture
 def strategy() -> CryptoPaymentStrategy:
     return CryptoPaymentStrategy()
@@ -11,7 +12,8 @@ def strategy() -> CryptoPaymentStrategy:
 
 class TestCryptoPaymentStrategy:
 
-    def test_pagamento_exato_com_taxa_aprovado(self, strategy: CryptoPaymentStrategy) -> None:
+    def test_pagamento_exato_com_taxa_aprovado(
+            self, strategy: CryptoPaymentStrategy) -> None:
         """Pagar exatamente total + 2% deve aprovar."""
         total = 100.0
         fee = total * CRYPTO_FEE_RATE
@@ -19,24 +21,34 @@ class TestCryptoPaymentStrategy:
         assert result.success is True
         assert result.approves_order is True
 
-    def test_pagamento_acima_do_necessario_aprovado(self, strategy: CryptoPaymentStrategy) -> None:
+    def test_pagamento_acima_do_necessario_aprovado(
+        self, strategy: CryptoPaymentStrategy) -> None:
         """Pagar acima de total + 2% deve aprovar."""
         result = strategy.process(100.0, 200.0)
         assert result.success is True
         assert result.approves_order is True
 
-    def test_pagamento_sem_taxa_recusado(self, strategy: CryptoPaymentStrategy) -> None:
+    def test_pagamento_sem_taxa_recusado(
+        self,
+        strategy: CryptoPaymentStrategy
+    ) -> None:
         """Pagar apenas o total sem incluir a taxa deve ser recusado."""
         result = strategy.process(100.0, 100.0)
         assert result.success is False
         assert result.approves_order is False
 
-    def test_pagamento_insuficiente_recusado(self, strategy: CryptoPaymentStrategy) -> None:
+    def test_pagamento_insuficiente_recusado(
+        self,
+        strategy: CryptoPaymentStrategy
+    ) -> None:
         """Valor abaixo do total também deve ser recusado."""
         result = strategy.process(100.0, 50.0)
         assert result.success is False
 
-    def test_taxa_calculada_corretamente(self, strategy: CryptoPaymentStrategy) -> None:
+    def test_taxa_calculada_corretamente(
+        self,
+        strategy: CryptoPaymentStrategy
+    ) -> None:
         """Taxa de 2% deve ser calculada sobre o total do pedido."""
         order_total = 200.0
         expected_fee = 4.0
@@ -69,15 +81,18 @@ class TestCryptoPaymentStrategy:
         assert "confirmada" in captured.out.lower()
 
     def test_integracao_com_payment_service(self) -> None:
-        """CryptoPaymentStrategy deve ser registrável no dicionário de strategies sem alterar PaymentService."""
+        """CryptoPaymentStrategy deve ser registrável
+        no dicionário de strategies sem alterar PaymentService."""
+        import os
+        import tempfile
+
+        from src.repositories.sqlite_repository import SqliteOrderRepository
+        from src.services.concrete_order_factory import ConcreteOrderFactory
         from src.services.notification_service import NotificationService
         from src.services.order_service import OrderService
-        from src.services.concrete_order_factory import ConcreteOrderFactory
         from src.services.payment_service import PaymentService
-        from src.repositories.sqlite_repository import SqliteOrderRepository
         from src.strategies.payment_implementations import CardPaymentStrategy
         from src.strategies.payment_strategy import PaymentStrategy
-        import tempfile, os
 
         with tempfile.TemporaryDirectory() as tmp:
             db_path = os.path.join(tmp, "test.db")
@@ -92,7 +107,14 @@ class TestCryptoPaymentStrategy:
             payment_service = PaymentService(repo, strategies, order_service)
 
             from src.models.order_item import OrderItem
-            items = [OrderItem(name="p1", price=100.0, quantity=1, discount_type="normal")]
+            items = [
+                OrderItem(
+                    name="p1",
+                    price=100.0,
+                    quantity=1,
+                    discount_type="normal"
+                )
+            ]
             order_id = order_service.create_order("Jorge", items, "normal")
 
             result = payment_service.process_payment(order_id, "cripto", 102.0)

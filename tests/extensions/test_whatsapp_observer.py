@@ -1,6 +1,7 @@
 import pytest
 from src.observers.whatsapp_observer import WhatsAppObserver
 
+
 @pytest.fixture
 def observer() -> WhatsAppObserver:
     return WhatsAppObserver()
@@ -88,11 +89,13 @@ class TestWhatsAppObserver:
         self, capsys: pytest.CaptureFixture[str]
     ) -> None:
         """Verifica integração dinâmica via ConcreteOrderFactory."""
-        from src.services.notification_service import NotificationService
-        from src.services.concrete_order_factory import ConcreteOrderFactory
+        import os
+        import tempfile
+
         from src.models.order_item import OrderItem
-        import tempfile, os
         from src.repositories.sqlite_repository import SqliteOrderRepository
+        from src.services.concrete_order_factory import ConcreteOrderFactory
+        from src.services.notification_service import NotificationService
         from src.services.order_service import OrderService
 
         with tempfile.TemporaryDirectory() as tmp:
@@ -102,7 +105,14 @@ class TestWhatsAppObserver:
             factory = ConcreteOrderFactory()
             order_service = OrderService(repo, factory, notif)
 
-            items = [OrderItem(name="p1", price=100.0, quantity=1, discount_type="normal")]
+            items = [
+                OrderItem(
+                    name="p1",
+                    price=100.0,
+                    quantity=1,
+                    discount_type="normal"
+                )
+            ]
             order_id = order_service.create_order("Jorge", items, "normal")
 
             notif.add_observer(WhatsAppObserver())

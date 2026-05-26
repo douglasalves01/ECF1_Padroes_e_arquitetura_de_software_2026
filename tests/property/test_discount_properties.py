@@ -1,7 +1,6 @@
 import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
-
 from src.strategies.client_discount_implementations import (
     CorporateClientDiscount,
     NoClientDiscount,
@@ -15,7 +14,12 @@ from src.strategies.discount_implementations import (
 
 
 @given(
-    price=st.floats(min_value=0.01, max_value=10000, allow_nan=False, allow_infinity=False),
+    price=st.floats(
+        min_value=0.01,
+        max_value=10000,
+        allow_nan=False,
+        allow_infinity=False
+    ),
     quantity=st.integers(min_value=1, max_value=1000),
     discount_type=st.sampled_from(["normal", "desc10", "desc20", "frete_gratis"]),
 )
@@ -35,11 +39,19 @@ def test_item_discount_formula(price, quantity, discount_type):
         "desc20": Discount20Strategy(),
     }
     expected = price * quantity * factors[discount_type]
-    assert strategies[discount_type].calculate(price, quantity) == pytest.approx(expected)
+    assert (
+        strategies[discount_type].calculate(price, quantity)
+        == pytest.approx(expected)
+    )
 
 
 @given(
-    subtotal=st.floats(min_value=0.01, max_value=10000, allow_nan=False, allow_infinity=False),
+    subtotal=st.floats(
+        min_value=0.01,
+        max_value=10000,
+        allow_nan=False,
+        allow_infinity=False
+    ),
     client_type=st.sampled_from(["normal", "vip", "corporativo"]),
 )
 @settings(max_examples=100)
@@ -51,4 +63,7 @@ def test_client_discount_factor(subtotal, client_type):
         "vip": VipClientDiscount(),
         "corporativo": CorporateClientDiscount(),
     }
-    assert strategies[client_type].apply(subtotal) == pytest.approx(subtotal * factors[client_type])
+    assert (
+        strategies[client_type].apply(subtotal)
+        == pytest.approx(subtotal * factors[client_type])
+    )

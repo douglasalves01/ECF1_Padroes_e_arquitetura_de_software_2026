@@ -1,5 +1,4 @@
 import pytest
-
 from src.application import create_application
 from src.models.order_item import OrderItem
 
@@ -27,7 +26,11 @@ def test_update_status_invalid_when_enforced(app) -> None:
     """Rejeita transicao invalida quando validacao ativa."""
     items = [OrderItem("p1", 100, 1, "normal")]
     order_id = app.order_service.create_order("Joao", items, "normal")
-    result = app.order_service.update_status(order_id, "entregue", enforce_transitions=True)
+    result = app.order_service.update_status(
+        order_id,
+        "entregue",
+        enforce_transitions=True
+    )
     assert result is False
 
 

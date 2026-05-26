@@ -1,5 +1,4 @@
 import pytest
-
 from src.models.order import Order
 from src.models.order_item import OrderItem
 from src.repositories.sqlite_repository import SqliteOrderRepository

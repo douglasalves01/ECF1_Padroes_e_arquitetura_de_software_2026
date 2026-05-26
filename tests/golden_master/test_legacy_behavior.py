@@ -5,7 +5,7 @@ import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
 
-from legacy import Sis, PedEspecial
+from legacy import PedEspecial, Sis
 
 
 @pytest.fixture
@@ -295,7 +295,7 @@ class TestReportGeneration:
         sis.add_ped('Joao', itens, 'normal')
         sis.gerar_rel('vendas')
         assert os.path.exists('rel_vendas.txt')
-        with open('rel_vendas.txt', 'r') as f:
+        with open('rel_vendas.txt') as f:
             content = f.read()
         assert len(content) > 0
         assert 'Total de vendas:' in content
@@ -307,7 +307,7 @@ class TestReportGeneration:
         sis.add_ped('Maria', itens, 'vip')
         sis.gerar_rel('clientes')
         assert os.path.exists('rel_clientes.txt')
-        with open('rel_clientes.txt', 'r') as f:
+        with open('rel_clientes.txt') as f:
             content = f.read()
         assert len(content) > 0
         assert 'Joao' in content
@@ -318,7 +318,7 @@ class TestReportGeneration:
         itens = [{'nome': 'produto1', 'p': 50, 'q': 2, 'tipo': 'normal'}]
         sis.add_ped('Joao', itens, 'normal')
         sis.gerar_rel('vendas')
-        with open('rel_vendas.txt', 'r') as f:
+        with open('rel_vendas.txt') as f:
             content = f.read()
         # Total = 50*2 = 100.0
         assert '100' in content
@@ -328,7 +328,7 @@ class TestReportGeneration:
         itens = [{'nome': 'produto1', 'p': 100, 'q': 1, 'tipo': 'normal'}]
         sis.add_ped('Carlos', itens, 'corporativo')
         sis.gerar_rel('clientes')
-        with open('rel_clientes.txt', 'r') as f:
+        with open('rel_clientes.txt') as f:
             content = f.read()
         assert 'Carlos,corporativo' in content
 

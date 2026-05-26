@@ -1,5 +1,4 @@
 import pytest
-
 from src.models.order_item import OrderItem
 from src.strategies.client_discount_implementations import (
     CorporateClientDiscount,

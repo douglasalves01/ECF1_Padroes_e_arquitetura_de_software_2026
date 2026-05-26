@@ -2,14 +2,13 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_ROOT = Path(__file__).resolve().parent
-if str(_ROOT) not in sys.path:
-    sys.path.insert(0, str(_ROOT))
-
 from src.application import ApplicationContext, create_application
 from src.models.order_item import OrderItem
 from src.repositories.sqlite_repository import SqliteOrderRepository
 
+_ROOT = Path(__file__).resolve().parent
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
 
 class Sis:
     def __init__(self) -> None:
